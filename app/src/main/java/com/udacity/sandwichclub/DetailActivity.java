@@ -83,7 +83,12 @@ public class DetailActivity extends AppCompatActivity {
         originTv.setText(sandwich.getPlaceOfOrigin());
         akaTv.setText(TextUtils.join(LIST_AS_STRING_DELIMITER, sandwich.getAlsoKnownAs()));
         ingredientsTv.setText(TextUtils.join(LIST_AS_STRING_DELIMITER, sandwich.getIngredients()));
-        descriptionTv.setText(sandwich.getDescription());
+
+        String description = sandwich.getDescription();
+        description = TextUtils.isEmpty(description) ?
+                getString(R.string.detail_description_not_available_message) :
+                description;
+        descriptionTv.setText(description);
 
         Picasso.with(this)
                 .load(sandwich.getImage())

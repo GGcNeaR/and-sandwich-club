@@ -1,5 +1,7 @@
 package com.udacity.sandwichclub.utils;
 
+import android.text.TextUtils;
+
 import com.udacity.sandwichclub.model.Sandwich;
 
 import org.json.JSONArray;
@@ -20,30 +22,46 @@ public class JsonUtils {
     private static final String INGREDIENTS_KEY = "ingredients";
 
     public static Sandwich parseSandwichJson(String json) throws JSONException {
+        Sandwich result = null;
         JSONObject sandwichJson = new JSONObject(json);
 
-        JSONObject nameJson = sandwichJson.getJSONObject(NAME_KEY);
-        // get the main name
-        String mainName = nameJson.getString(MAIN_NAME_KEY);
-        // get the list of aliases
-        List<String> akaNamesList = new ArrayList<>();
-        JSONArray akaNamesJsonArray = nameJson.getJSONArray(AKA_KEY);
-        for (int i = 0; i < akaNamesJsonArray.length(); i++) {
-            akaNamesList.add(akaNamesJsonArray.getString(i));
-        }
-        // get place of origin
-        String placeOfOrigin = sandwichJson.getString(PLACE_OF_ORIGIN_KEY);
-        // get description
-        String description = sandwichJson.getString(DESCRIPTION_KEY);
-        // get image
-        String imageUrl = sandwichJson.getString(IMAGE_KEY);
-        // get ingredients
-        List<String> ingredientsList = new ArrayList<>();
-        JSONArray ingredientsJsonArray = sandwichJson.getJSONArray(INGREDIENTS_KEY);
-        for (int i = 0; i < ingredientsJsonArray.length(); i++) {
-            ingredientsList.add(ingredientsJsonArray.getString(i));
+        if (sandwichJson.has(NAME_KEY)) {
+            String mainName;
+            List<String> akaNamesList = new ArrayList<>();
+
+            JSONObject nameJson = sandwichJson.getJSONObject(NAME_KEY);
+            // get the main name
+            if (nameJson.has(MAIN_NAME_KEY)) {
+                mainName = nameJson.optString(MAIN_NAME_KEY);
+
+                // get the list of aliases
+                JSONArray akaNamesJsonArray = nameJson.getJSONArray(AKA_KEY);
+                jsonArrayToList(akaNamesJsonArray, akaNamesList);
+
+                // get place of origin
+                String placeOfOrigin = sandwichJson.optString(PLACE_OF_ORIGIN_KEY);
+                // get description
+                String description = sandwichJson.optString(DESCRIPTION_KEY);
+                // get image
+                String imageUrl = sandwichJson.optString(IMAGE_KEY);
+                // get ingredients
+                List<String> ingredientsList = new ArrayList<>();
+                JSONArray ingredientsJsonArray = sandwichJson.getJSONArray(INGREDIENTS_KEY);
+                jsonArrayToList(ingredientsJsonArray, ingredientsList);
+
+                result = new Sandwich(mainName, akaNamesList, placeOfOrigin, description, imageUrl, ingredientsList);
+            }
         }
 
-        return new Sandwich(mainName, akaNamesList, placeOfOrigin, description, imageUrl, ingredientsList);
+        return result;
+    }
+
+    private static void jsonArrayToList(JSONArray array, List<String> list) {
+        for (int i = 0; i < array.length(); i++) {
+            String item = array.optString(i);
+            if (!TextUtils.isEmpty(item)) {
+                list.add(item);
+            }
+        }
     }
 }
